@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: dejavu_db
+      MYSQL_USER: dejavu
+      MYSQL_PASSWORD: dejavu_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  dejavu-worker:
+    build: ./app
+    environment:
+      - DJV_DB_HOST=db
+      - DJV_DB_USER=dejavu
+      - DJV_DB_PASS=dejavu_pass
+      - DJV_DB_NAME=dejavu_db
+    depends_on:
+      - db
+    volumes:
+      - ./sample_audio:/app/sample_audio
+      - ./indexes:/app/indexes
+    command: ["tail", "-f", "/dev/null"]  # keep container running for interactive use
+
+volumes:
+  db_data:
